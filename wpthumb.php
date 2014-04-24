@@ -497,7 +497,7 @@ class WP_Thumb {
 			    $_width = $height * $ratio1;
 			}
 
-			$editor->resize( $_width, $_height );
+			return $editor->resize( $_width, $_height );
 		}
 	}
 
