@@ -140,6 +140,8 @@ class WP_Thumb {
 			'height'				    => 0,
 			'crop'					    => false,
 			'crop_from_position' 	    => 'center,center',
+			'crop_width'				=> 0,
+			'crop_height'				=> 0,
 			'resize'				    => true,
 			'watermark_options' 	    => array(),
 			'cache'					    => true,
@@ -180,6 +182,8 @@ class WP_Thumb {
 		$args['cache'] 	= (bool) $args['cache'];
 		$args['width'] 	= (int) $args['width'];
 		$args['height'] = (int) $args['height'];
+		$args['crop_width'] 	= (int) $args['crop_width'];
+		$args['crop_height'] = (int) $args['crop_height'];
 
 		// Format the crop from position arg
 		if ( is_string( $args['crop_from_position'] ) && $args['crop_from_position'] )
@@ -456,6 +460,28 @@ class WP_Thumb {
 	private function crop_from_position( $editor, $width, $height, $position, $resize = true ) {
 
 		$size = $editor->get_size();
+		$crop = array( 'x' => 0, 'y' => 0 );
+
+		if ( $position[0] == 'right' )
+			$crop['x'] = absint( $size['width'] - $width );
+		else if ( $position[0] == 'center' )
+			$crop['x'] = intval( absint( $size['width'] - $width ) / 2 );
+		else
+			$crop['x'] = intval( absint( $position[0] ));
+
+		if ( $position[1] == 'bottom' )
+			$crop['y'] = absint( $size['height'] - $height );
+		else if ( $position[1] == 'center' )
+			$crop['y'] = intval( absint( $size['height'] - $height ) / 2 );
+		else
+			$crop['y'] = intval( absint( $position[1] ));
+
+		$c_width = $this->getArg( 'crop_width' );
+		$c_height = $this->getArg( 'crop_height' );
+
+		$editor->crop( $crop['x'], $crop['y'], $c_width, $c_height );
+
+		$size = $editor->get_size();
 
 		// resize to the largest dimension
 		if ( $resize ) {
@@ -473,22 +499,6 @@ class WP_Thumb {
 
 			$editor->resize( $_width, $_height );
 		}
-
-		$size = $editor->get_size();
-		$crop = array( 'x' => 0, 'y' => 0 );
-
-		if ( $position[0] == 'right' )
-			$crop['x'] = absint( $size['width'] - $width );
-		else if ( $position[0] == 'center' )
-			$crop['x'] = intval( absint( $size['width'] - $width ) / 2 );
-
-		if ( $position[1] == 'bottom' )
-			$crop['y'] = absint( $size['height'] - $height );
-		else if ( $position[1] == 'center' )
-			$crop['y'] = intval( absint( $size['height'] - $height ) / 2 );
-
-
-		return $editor->crop( $crop['x'], $crop['y'], $width, $height );
 	}
 
 	/**
